@@ -2,3 +2,5 @@ yahoo_fin
 aiohttp
 gunicorn
 requests
+pandas
+numpy
