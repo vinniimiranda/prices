@@ -9,7 +9,7 @@ def handle(request):
     ticker = request.rel_url.query.get('ticker')
     days = request.rel_url.query.get('days') or 0
     end_date = datetime.datetime.now()
-    sub = datetime.timedelta(days)
+    sub = datetime.timedelta(int(days))
     start_date = end_date - sub
     data = si.get_data(f'{ticker}.SA', start_date, end_date, index_as_date=False, interval="1d")
     return web.Response(text=data.to_csv())
