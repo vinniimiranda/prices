@@ -3,4 +3,4 @@ aiohttp
 gunicorn
 requests
 pandas
-numpy
+ftplib
