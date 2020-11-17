@@ -1,20 +1,38 @@
-from aiohttp import web
 from yahoo_fin import stock_info as si
 import datetime
 from time import sleep
 import os
-
-
-def handle(request):
-    ticker = request.rel_url.query.get('ticker')
-    days = request.rel_url.query.get('days') or 0
-    end_date = datetime.datetime.now()
-    sub = datetime.timedelta(int(days))
-    start_date = end_date - sub
-    data = si.get_data(f'{ticker}.SA', start_date, end_date, index_as_date=False, interval="1d")
-    return web.Response(text=data.to_csv())
-app = web.Application()
-app.router.add_get('/', handle)
+import asyncio
+import websockets
+import datetime
+import json
 
 port = int(os.environ.get('PORT', 8000))
-web.run_app(app, port=port)
+
+async def handle(websocket, path):
+    print("New connection")
+    async for message in websocket:
+        data = json.loads(message)
+        print(data)
+        if data['action'] == "getPrices":
+            days = 10
+            if data['days']: 
+                days = data['days']
+            end_date = datetime.datetime.now()
+            sub = datetime.timedelta(int(days))
+            start_date = end_date - sub
+            prices = si.get_data(data['ticker'] + '.SA', start_date, end_date,
+                                 index_as_date=False, interval="1d")
+            await websocket.send(prices.to_csv())
+        elif data['action'] == "realTime":
+            while True:
+                sleep(10)
+                price = si.get_live_price(data['ticker'] + '.SA')
+                await websocket.send(str(price))
+        else:
+            await websocket.send('FALSE')
+
+start_server = websockets.serve(handle, "127.0.0.1", port)
+
+asyncio.get_event_loop().run_until_complete(start_server)
+asyncio.get_event_loop().run_forever()
