@@ -8,6 +8,7 @@ import datetime
 import json
 
 port = int(os.environ.get('PORT', 8000))
+host = str(os.environ.get('HOST', '0.0.0.0'))
 
 async def handle(websocket, path):
     print("New connection")
@@ -32,6 +33,6 @@ async def handle(websocket, path):
         else:
             await websocket.send('FALSE')
 
-start_server = websockets.serve(handle, "127.0.0.1", port)
+start_server = websockets.serve(handle, host, port)
 asyncio.get_event_loop().run_until_complete(start_server)
 asyncio.get_event_loop().run_forever()
