@@ -23,7 +23,7 @@ async def handle(websocket, path):
             sub = datetime.timedelta(int(days))
             start_date = end_date - sub
             prices = si.get_data(data['ticker'] + '.SA', start_date, end_date,
-                                 index_as_date=False, interval="1d")
+                                 index_as_date=False, interval=data['interval'])
             await websocket.send(prices.to_csv())
         elif data['action'] == "realTime":
             while True:
